@@ -5,14 +5,14 @@
 @import "nativewind/theme";
 
 @theme {
-  --font-sans: "sans";
-  --font-sans-bold: "sans-bold";
-  --font-sans-semibold: "sans-semibold";
-  --font-sans-extrabold: "sans-extrabold";
-  --font-sans-medium: "sans-medium";
-  --font-sans-light: "sans-light";
+  --font-sans: "Sans";
+  --font-sans-bold: "Sans-Bold";
+  --font-sans-semibold: "Sans-SemiBold";
+  --font-sans-extrabold: "Sans-ExtraBold";
+  --font-sans-medium: "Sans-Medium";
+  --font-sans-light: "Sans-Light";
 
-  --color-background: #fff9e3;
+  --color-background: #fff9e3;`
   --color-foreground: #081126;
   --color-card: #fff8e7;
   --color-muted: #f6eecf;
