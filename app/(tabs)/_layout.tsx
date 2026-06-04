@@ -1,21 +1,16 @@
-import { tabs } from "@/constants/tabs";
+import { tabs } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
 import cn from "clsx";
 import { Tabs } from "expo-router";
-import { Image, ImageSourcePropType, View } from "react-native";
+import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { tabBar } = components;
 
-type TabBarIconProps = {
-  focused: boolean;
-  source: ImageSourcePropType;
-};
-
-const TabBarIcon = ({ focused, source }: TabBarIconProps) => (
+const TabIcon = ({ focused, icon }: TabIconProps) => (
   <View className="tabs-icon">
     <View className={cn("tabs-pill", { "tabs-active": focused })}>
-      <Image source={source} resizeMode="contain" className="tabs-glyph" />
+      <Image source={icon} resizeMode="contain" className="tabs-glyph" />
     </View>
   </View>
 );
@@ -55,7 +50,7 @@ const TabsLayout = () => {
           options={{
             title: tab.title,
             tabBarIcon: ({ focused }) => (
-              <TabBarIcon focused={focused} source={tab.icon} />
+              <TabIcon focused={focused} icon={tab.icon} />
             ),
           }}
         />
