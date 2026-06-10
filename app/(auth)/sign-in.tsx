@@ -1,7 +1,13 @@
 import { useSignIn } from "@clerk/expo";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function SignInScreen() {
   const { signIn, isLoading } = useSignIn();
@@ -44,7 +50,9 @@ export default function SignInScreen() {
 
   return (
     <View className="flex-1 bg-background px-5 py-8 justify-center">
-      <Text className="text-3xl font-sans-bold text-primary mb-2">Welcome back</Text>
+      <Text className="text-3xl font-sans-bold text-primary mb-2">
+        Welcome back
+      </Text>
       <Text className="text-sm text-muted-foreground mb-6">
         Sign in to your account
       </Text>
@@ -107,7 +115,7 @@ export default function SignInScreen() {
       )}
 
       <View className="flex-row items-center justify-center mt-6 gap-1">
-        <Text className="text-primary">Don't have an account? </Text>
+        <Text className="text-primary">Don&apos;t have an account? </Text>
         <Link href="/(auth)/sign-up">
           <Text className="text-accent font-sans-semibold">Sign up</Text>
         </Link>

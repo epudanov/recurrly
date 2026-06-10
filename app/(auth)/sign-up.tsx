@@ -1,7 +1,13 @@
 import { useSignUp } from "@clerk/expo";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function SignUpScreen() {
   const { signUp, isLoading } = useSignUp();
@@ -11,7 +17,9 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [stage, setStage] = useState<"credentials" | "verification">("credentials");
+  const [stage, setStage] = useState<"credentials" | "verification">(
+    "credentials",
+  );
 
   const handleSignUp = async () => {
     setErrors({});
@@ -35,7 +43,8 @@ export default function SignUpScreen() {
       setStage("verification");
     } catch (error: any) {
       setErrors({
-        submit: error?.errors?.[0]?.message || "Sign up failed. Please try again.",
+        submit:
+          error?.errors?.[0]?.message || "Sign up failed. Please try again.",
       });
     }
   };
@@ -69,7 +78,9 @@ export default function SignUpScreen() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setErrors({});
     } catch (error: any) {
-      setErrors({ submit: error?.errors?.[0]?.message || "Failed to resend code" });
+      setErrors({
+        submit: error?.errors?.[0]?.message || "Failed to resend code",
+      });
     }
   };
 
@@ -124,6 +135,18 @@ export default function SignUpScreen() {
           </Text>
         </Pressable>
 
+        <Pressable
+          className={`border-2 border-muted rounded-lg py-3 px-6 items-center justify-center mt-3 ${
+            isLoading ? "opacity-50" : ""
+          }`}
+          onPress={() => setStage("credentials")}
+          disabled={isLoading}
+        >
+          <Text className="text-muted-foreground font-sans-semibold">
+            Change email
+          </Text>
+        </Pressable>
+
         {errors.submit && (
           <Text className="text-destructive text-xs font-sans-medium mt-3 text-center">
             {errors.submit}
@@ -135,7 +158,9 @@ export default function SignUpScreen() {
 
   return (
     <View className="flex-1 bg-background px-5 py-8 justify-center">
-      <Text className="text-3xl font-sans-bold text-primary mb-2">Create account</Text>
+      <Text className="text-3xl font-sans-bold text-primary mb-2">
+        Create account
+      </Text>
       <Text className="text-sm text-muted-foreground mb-6">
         Get started with Recurrly
       </Text>
