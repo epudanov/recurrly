@@ -10,12 +10,13 @@ import {
 } from "react-native";
 
 export default function SignInScreen() {
-  const { signIn, isLoading } = useSignIn();
+  const { signIn } = useSignIn();
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "fetching">("idle");
 
   const handleSignIn = async () => {
     setErrors({});
@@ -30,18 +31,26 @@ export default function SignInScreen() {
     }
 
     try {
-      const result = await signIn.create({
+      setFetchStatus("fetching");
+      const { error } = await signIn.password({
         identifier: emailAddress,
         password,
       });
+      setFetchStatus("idle");
+      if (error) {
+        setErrors({ submit: error.message });
+        return;
+      }
 
-      if (result.status === "complete") {
+      if (signIn.status === "complete") {
+        await signIn.finalize();
         // Redirect to tabs after successful sign-in
         router.replace("/(tabs)");
       } else {
         setErrors({ submit: "Sign in failed. Please try again." });
       }
     } catch (error: any) {
+      setFetchStatus("idle");
       setErrors({
         submit: error?.errors?.[0]?.message || "Invalid email or password",
       });
@@ -67,7 +76,7 @@ export default function SignInScreen() {
         onChangeText={setEmailAddress}
         keyboardType="email-address"
         autoCapitalize="none"
-        editable={!isLoading}
+        editable={fetchStatus !== "fetching"}
       />
       {errors.email && (
         <Text className="text-destructive text-xs font-sans-medium mb-3">
@@ -84,7 +93,7 @@ export default function SignInScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        editable={!isLoading}
+        editable={fetchStatus !== "fetching"}
       />
       {errors.password && (
         <Text className="text-destructive text-xs font-sans-medium mb-3">
@@ -94,12 +103,12 @@ export default function SignInScreen() {
 
       <Pressable
         className={`bg-accent rounded-lg py-4 px-6 items-center justify-center ${
-          isLoading ? "opacity-50" : ""
+          fetchStatus === "fetching" ? "opacity-50" : ""
         }`}
         onPress={handleSignIn}
-        disabled={isLoading}
+        disabled={fetchStatus === "fetching"}
       >
-        {isLoading ? (
+        {fetchStatus === "fetching" ? (
           <ActivityIndicator color="#ffffff" />
         ) : (
           <Text className="text-white font-sans-semibold text-base">

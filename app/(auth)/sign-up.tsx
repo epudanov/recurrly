@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 export default function SignUpScreen() {
-  const { signUp, isLoading } = useSignUp();
+  const { signUp } = useSignUp();
   const router = useRouter();
 
   const [emailAddress, setEmailAddress] = useState("");
@@ -20,6 +20,7 @@ export default function SignUpScreen() {
   const [stage, setStage] = useState<"credentials" | "verification">(
     "credentials",
   );
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "fetching">("idle");
 
   const handleSignUp = async () => {
     setErrors({});
@@ -34,14 +35,23 @@ export default function SignUpScreen() {
     }
 
     try {
-      await signUp.create({
+      setFetchStatus("fetching");
+      const { error } = await signUp.password({
         emailAddress,
         password,
       });
+      setFetchStatus("idle");
+      if (error) {
+        setErrors({ submit: error.message });
+        return;
+      }
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setFetchStatus("fetching");
+      await signUp.verifications.sendEmailCode();
+      setFetchStatus("idle");
       setStage("verification");
     } catch (error: any) {
+      setFetchStatus("idle");
       setErrors({
         submit:
           error?.errors?.[0]?.message || "Sign up failed. Please try again.",
@@ -58,15 +68,23 @@ export default function SignUpScreen() {
     }
 
     try {
-      await signUp.attemptEmailAddressVerification({ code });
+      setFetchStatus("fetching");
+      const { error } = await signUp.verifications.verifyEmailCode({ code });
+      setFetchStatus("idle");
+      if (error) {
+        setErrors({ code: error.message });
+        return;
+      }
 
       if (signUp.status === "complete") {
+        await signUp.finalize();
         // Redirect to tabs after successful sign-up
         router.replace("/(tabs)");
       } else {
         setErrors({ submit: "Verification failed. Please try again." });
       }
     } catch (error: any) {
+      setFetchStatus("idle");
       setErrors({
         code: error?.errors?.[0]?.message || "Invalid verification code",
       });
@@ -75,11 +93,14 @@ export default function SignUpScreen() {
 
   const handleResendCode = async () => {
     try {
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setFetchStatus("fetching");
+      await signUp.verifications.sendEmailCode();
+      setFetchStatus("idle");
       setErrors({});
     } catch (error: any) {
+      setFetchStatus("idle");
       setErrors({
-        submit: error?.errors?.[0]?.message || "Failed to resend code",
+        submit: error?.message || "Failed to resend code",
       });
     }
   };
@@ -101,7 +122,7 @@ export default function SignUpScreen() {
           value={code}
           onChangeText={setCode}
           keyboardType="numeric"
-          editable={!isLoading}
+          editable={fetchStatus !== "fetching"}
         />
         {errors.code && (
           <Text className="text-destructive text-xs font-sans-medium mb-3">
@@ -111,12 +132,12 @@ export default function SignUpScreen() {
 
         <Pressable
           className={`bg-accent rounded-lg py-4 px-6 items-center justify-center ${
-            isLoading ? "opacity-50" : ""
+            fetchStatus === "fetching" ? "opacity-50" : ""
           }`}
           onPress={handleVerifyEmail}
-          disabled={isLoading}
+          disabled={fetchStatus === "fetching"}
         >
-          {isLoading ? (
+          {fetchStatus === "fetching" ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
             <Text className="text-white font-sans-semibold text-base">
@@ -128,19 +149,19 @@ export default function SignUpScreen() {
         <Pressable
           className="border-2 border-primary rounded-lg py-4 px-6 items-center justify-center mt-3"
           onPress={handleResendCode}
-          disabled={isLoading}
+          disabled={fetchStatus === "fetching"}
         >
           <Text className="text-primary font-sans-semibold">
-            Didn't receive a code? Resend
+            Didn&apos;t receive a code? Resend
           </Text>
         </Pressable>
 
         <Pressable
           className={`border-2 border-muted rounded-lg py-3 px-6 items-center justify-center mt-3 ${
-            isLoading ? "opacity-50" : ""
+            fetchStatus === "fetching" ? "opacity-50" : ""
           }`}
           onPress={() => setStage("credentials")}
-          disabled={isLoading}
+          disabled={fetchStatus === "fetching"}
         >
           <Text className="text-muted-foreground font-sans-semibold">
             Change email
@@ -175,7 +196,7 @@ export default function SignUpScreen() {
         onChangeText={setEmailAddress}
         keyboardType="email-address"
         autoCapitalize="none"
-        editable={!isLoading}
+        editable={fetchStatus !== "fetching"}
       />
       {errors.email && (
         <Text className="text-destructive text-xs font-sans-medium mb-3">
@@ -192,7 +213,7 @@ export default function SignUpScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        editable={!isLoading}
+        editable={fetchStatus !== "fetching"}
       />
       {errors.password && (
         <Text className="text-destructive text-xs font-sans-medium mb-3">
@@ -202,12 +223,12 @@ export default function SignUpScreen() {
 
       <Pressable
         className={`bg-accent rounded-lg py-4 px-6 items-center justify-center ${
-          isLoading ? "opacity-50" : ""
+          fetchStatus === "fetching" ? "opacity-50" : ""
         }`}
         onPress={handleSignUp}
-        disabled={isLoading}
+        disabled={fetchStatus === "fetching"}
       >
-        {isLoading ? (
+        {fetchStatus === "fetching" ? (
           <ActivityIndicator color="#ffffff" />
         ) : (
           <Text className="text-white font-sans-semibold text-base">
